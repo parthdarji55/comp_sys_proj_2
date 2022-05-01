@@ -20,9 +20,9 @@ void sig_func(int sig){
 
     if ( sig == 20 || sig == 11 || sig == 8 ){
         printf("Sending signal to thread: 1\n");
-        //pthread_kill(tid[1], SIGCHLD);
+        pthread_kill(tid[1], SIGCHLD);
         pthread_kill(tid[1], SIGSEGV);
-        //pthread_kill(tid[1], SIGFPE);
+        pthread_kill(tid[1], SIGFPE);
     }
 
     if ( sig == 1 || sig == 18 ){
@@ -33,15 +33,19 @@ void sig_func(int sig){
 }
 
 void sig_func2(int sig) {
-    printf("Caught signal no = %d, in thread 0\n", sig);
+    printf("Caught and handled signal no = %d, in thread 0\n", sig);
 }
 
 void sig_func3(int sig) {
-    printf("Caught signal no = %d, in thread 1\n", sig);
+    printf("Caught and handled signal no = %d, in thread 1\n", sig);
 }
 
 void sig_func4(int sig) {
-    printf("Caught signal no = %d, in thread 2\n", sig);
+    printf("Caught and handled signal no = %d, in thread 2\n", sig);
+}
+
+void sig_func5(int sig) {
+    printf("Caught and handled signal no = %d, in thread 3\n", sig);
 }
 
 void *threadFunc (void *thread_id) {
@@ -60,23 +64,19 @@ void *threadFunc (void *thread_id) {
     if (id ==2 ) {
         signal(SIGHUP, sig_func4);
         signal(SIGTSTP, sig_func4);
+        signal(SIGCHLD, sig_func4);
     }
     if (id == 3 ) {
+        signal(SIGFPE, sig_func5);
+        signal(SIGTSTP, sig_func5);
+        signal( SIGINT, sig_func5);
     }
     printf("Thread number %d \n", id);
 
-    /* sigset_t set;
-    int s;
-    sigemptyset(&set);
-    sigaddset(&set, SIGSEGV);
-    sigaddset(&set, SIGUSR1);
-    s = sigprocmask(SIG_BLOCK, &set, NULL);
-    //s = pthread_sigmask(SIG_BLOCK, &set, NULL);
-    printf("%d", s);*/
 }
 
 int main () {
- 
+    
     signal(SIGINT, sig_func);
     signal(SIGABRT, sig_func);
     signal(SIGILL, sig_func);
@@ -91,8 +91,9 @@ int main () {
         pthread_create(&tid[i], NULL, threadFunc, &ids[i]);
     }
     
-    sleep(1);
+sleep(1);
 
+    // sending signals our program
     kill(getpid(), SIGINT);
     kill(getpid(), SIGABRT);
     kill(getpid(), SIGILL);
@@ -103,16 +104,12 @@ int main () {
     kill(getpid(), SIGTSTP);
 
     sleep(1);
-/*
-    pthread_kill(tid[1], SIGSEGV);      // Line A
-    pthread_kill(tid[2], SIGSEGV);      // Line C
-    pthread_kill(tid[1], SIGINT);       // Line D
-    pthread_kill(tid[3], SIGINT);       // Line E
-*/
+    
     for ( int i = 0; i < NUM_THREADS; i++){
         pthread_join(tid[i], NULL);
     }
 
+    // restore default behaviors
     signal(SIGINT, SIG_DFL);
     signal(SIGABRT, SIG_DFL);
     signal(SIGILL, SIG_DFL);
