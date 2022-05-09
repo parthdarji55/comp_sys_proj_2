@@ -7,28 +7,43 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <signal.h>
+#include <time.h>
+#include <stdlib.h>
 
 pthread_t tid[NUM_THREADS];
 void sig_func(int sig){
+    srand(time(NULL));
+    float r = (float)rand()/(float)RAND_MAX;
     printf("Caught signal no = %d\n", sig);
-    if ( sig == 2 || sig == 4 || sig ==6 ){
+    
+    if (r> 0.5 && (sig == 2 || sig == 4 || sig ==6) ){
         printf("Sending signal to thread: 0\n");
-        pthread_kill(tid[0], SIGINT);
-        pthread_kill(tid[0], SIGABRT);
-        pthread_kill(tid[0], SIGILL);
+        pthread_kill(tid[0], sig);
+        //pthread_kill(tid[0], SIGINT);
+        //pthread_kill(tid[0], SIGILL);
+        //pthread_kill(tid[0], SIGABRT);
+    }else {
+        pthread_kill(tid[3], sig);
+        //pthread_kill(tid[3], SIGINT);
+        //pthread_kill(tid[3], SIGILL);
+        //pthread_kill(tid[3], SIGABRT);
     }
+    
 
-    if ( sig == 20 || sig == 11 || sig == 8 ){
+    if ( (r > 0.5 && sig == 17) || sig == 11 || sig == 8 ){
         printf("Sending signal to thread: 1\n");
-        pthread_kill(tid[1], SIGCHLD);
-        pthread_kill(tid[1], SIGSEGV);
-        pthread_kill(tid[1], SIGFPE);
+        pthread_kill(tid[1], sig);
+        //pthread_kill(tid[1], SIGCHLD);
+        //pthread_kill(tid[1], SIGSEGV);
+        //pthread_kill(tid[1], SIGFPE);
     }
 
-    if ( sig == 1 || sig == 18 ){
+    if ( (r <= 0.5 && sig == 17) ||  sig == 1 || sig == 20 ){
         printf("Sending signal to thread: 2\n");
-        pthread_kill(tid[2], SIGHUP);
-        pthread_kill(tid[2], SIGTSTP);
+        pthread_kill(tid[2], sig);
+        //pthread_kill(tid[2], SIGCHLD);
+        //pthread_kill(tid[2], SIGHUP);
+        //pthread_kill(tid[2], SIGTSTP);
     }
 }
 
