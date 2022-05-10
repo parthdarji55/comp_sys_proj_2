@@ -23,6 +23,7 @@ void sig_func(int sig){
         //pthread_kill(tid[0], SIGILL);
         //pthread_kill(tid[0], SIGABRT);
     }else {
+        printf("Sending signal to thread: 4\n");
         pthread_kill(tid[3], sig);
         //pthread_kill(tid[3], SIGINT);
         //pthread_kill(tid[3], SIGILL);
